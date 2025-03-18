@@ -8,7 +8,7 @@
 You can install the minimal required packages via **pip**:
 
 ```bash
-pip install torch einops numpy ot matplotlib tqdm wandb seaborn
+pip install torch einops numpy POT matplotlib tqdm wandb seaborn
 ```
 
 ## Usage
