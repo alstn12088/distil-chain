@@ -30,7 +30,7 @@ parser.add_argument('--batch_size', type=int, default=500)
 
 ################################################################
 # Number of bootstrap samples for Model(x, t) + Langevin Dynamics K steps \approx Model(x, t+K)
-parser.add_argument('--bootstrap_K', type=float, default=100)
+parser.add_argument('--bootstrap_K', type=int, default=100)
 
 
 ################################################################
@@ -183,19 +183,18 @@ def train():
         optim_policy.zero_grad()
 
         x0_samples = torch.randn(args.batch_size, energy.data_ndim, device=device) * 3
-        bootstrap_K = 100
 
-        t_int = torch.randint(0, T - bootstrap_K - 1, (1,)).item()
+        t_int = torch.randint(0, T - args.bootstrap_K - 1, (1,)).item()
         
         # 0 < t < 1
         t_batch = torch.ones(args.batch_size, 1, device=device) * t_int / T
 
 
         x_pred = distil_model(x0_samples, t_batch)
-        x_target, _ = langevin_dynamics(x_pred, energy.log_reward, device, bootstrap_K, args)
+        x_target, _ = langevin_dynamics(x_pred, energy.log_reward, device, args.bootstrap_K, args)
         x_target = x_target[-1].squeeze(0)
 
-        x_bootstrap = distil_model(x0_samples, t_batch + bootstrap_K/T)
+        x_bootstrap = distil_model(x0_samples, t_batch + args.bootstrap_K/T)
 
         bootstrap_loss = moment_loss(x_bootstrap, x_target.detach())
 
